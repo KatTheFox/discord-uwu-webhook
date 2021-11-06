@@ -1,10 +1,11 @@
 # Discord UwU Webhook
 
 [![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
-![GitHub issues](https://img.shields.io/github/issues/bs2kbs2k/discord-uwu-webhook?style=flat-square)
-[![GitHub forks](https://img.shields.io/github/forks/bs2kbs2k/discord-uwu-webhook?style=flat-square)](https://github.com/bs2kbs2k/discord-uwu-webhook/network)
-[![GitHub stars](https://img.shields.io/github/stars/bs2kbs2k/discord-uwu-webhook?style=flat-square)](https://github.com/bs2kbs2k/discord-uwu-webhook/stargazers)  
+![GitHub issues](https://img.shields.io/github/issues/KyojoH/discord-uwu-webhook?style=flat-square)
+[![GitHub forks](https://img.shields.io/github/forks/KyojoH/discord-uwu-webhook?style=flat-square)](https://github.com/KyojoH/discord-uwu-webhook/network)
+[![GitHub stars](https://img.shields.io/github/stars/KyojoH/discord-uwu-webhook?style=flat-square)](https://github.com/KyojoH/discord-uwu-webhook/stargazers)  
 Automatically UwUifies all sent messages on Discord via webhooks
+Based on code by bs2kbs2k
 
 # Install
 
