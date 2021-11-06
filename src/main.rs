@@ -18,13 +18,13 @@ impl EventHandler for Handler {
     // Event handlers are dispatched through a threadpool, and so multiple
     // events can be dispatched simultaneously.
     async fn message(&self, ctx: Context, msg: Message) {
-        const ROLE: serenity::model::id::RoleId =
-            serenity::model::id::RoleId(874_977_122_991_611_944);
+        let role: serenity::model::id::RoleId =
+            serenity::model::id::RoleId(env::var("ROLE_ID").expect("Expected an id in $ROLE_ID").parse::<u64>().expect("Invalid id"));
         let guild = match msg.guild(&ctx.cache).await {
             None => return eprintln!("Error getting guild"),
             Some(list) => list,
         };
-        let has_role = match msg.author.has_role(&ctx.http, guild.id, ROLE).await {
+        let has_role = match msg.author.has_role(&ctx.http, guild.id, role).await {
             Err(_) => false,
             Ok(list) => list,
         };
@@ -96,7 +96,6 @@ impl EventHandler for Handler {
         println!("{} is connected!", ready.user.name);
     }
 }
-
 #[tokio::main]
 async fn main() {
     // Configure the client with your Discord bot token in the environment.
@@ -109,7 +108,7 @@ async fn main() {
         .event_handler(Handler)
         .await
         .expect("Error creating client");
-
+    
     // Finally, start a single shard, and start listening to events.
     //
     // Shards will automatically attempt to reconnect, and will perform
