@@ -1,6 +1,3 @@
-#![deny(clippy::all)]
-#![deny(clippy::pedantic)]
-
 use std::env;
 
 use serde_json::json;
@@ -21,59 +18,71 @@ impl EventHandler for Handler {
     // Event handlers are dispatched through a threadpool, and so multiple
     // events can be dispatched simultaneously.
     async fn message(&self, ctx: Context, msg: Message) {
+        const ROLE: serenity::model::id::RoleId =
+            serenity::model::id::RoleId(874_977_122_991_611_944);
+        let guild = match msg.guild(&ctx.cache).await {
+            None => return eprintln!("Error getting guild"),
+            Some(list) => list,
+        };
+        let has_role = match msg.author.has_role(&ctx.http, guild.id, ROLE).await {
+            Err(_) => false,
+            Ok(list) => list,
+        };
         if msg.webhook_id.is_none() {
-            let mut webhooks = match ctx
-                .http
-                .get_channel_webhooks(u64::from(msg.channel_id))
-                .await
-            {
-                Err(why) => return eprintln!("Error getting webhooks: {:?}", why),
-                Ok(list) => list,
-            };
-            let webhook = match if webhooks.is_empty() {
-                match ctx
+            if has_role {
+                let mut webhooks = match ctx
                     .http
-                    .create_webhook(u64::from(msg.channel_id), &json!({"name": "UwU wats dis"}))
+                    .get_channel_webhooks(u64::from(msg.channel_id))
                     .await
                 {
-                    Err(why) => {
-                        eprintln!("Error creating webhook: {:?}", why);
-                        None
+                    Err(why) => return eprintln!("Error getting webhooks: {:?}", why),
+                    Ok(list) => list,
+                };
+                let webhook = match if webhooks.is_empty() {
+                    match ctx
+                        .http
+                        .create_webhook(u64::from(msg.channel_id), &json!({"name": "UwU wats dis"}))
+                        .await
+                    {
+                        Err(why) => {
+                            eprintln!("Error creating webhook: {:?}", why);
+                            None
+                        }
+                        Ok(webhook) => Some(webhook),
                     }
-                    Ok(webhook) => Some(webhook),
-                }
-            } else {
-                webhooks.pop()
-            } {
-                Some(webhook) => webhook,
-                None => return,
-            };
-            let nick = msg
-                .author_nick(&ctx)
-                .await
-                .unwrap_or_else(|| msg.author.name.clone());
-            if let Err(why) = webhook
-                .execute(&ctx, true, |w| {
-                    w.avatar_url(
-                        msg.author
-                            .avatar_url()
-                            .unwrap_or_else(|| msg.author.default_avatar_url()),
-                    )
-                    .content(uwuifier::uwuify_str_sse(&*msg.content))
-                    .username(nick)
-                    .files(
-                        msg.attachments
-                            .iter()
-                            .map(|a| AttachmentType::Image(&*a.url)),
-                    )
-                })
-                .await
-            {
-                return eprintln!("Error executing webhook: {:?}", why);
-            };
-            if let Err(why) = msg.delete(&ctx).await {
-                return eprintln!("Error deleting message: {:?}", why);
-            };
+                } else {
+                    webhooks.pop()
+                } {
+                    Some(webhook) => webhook,
+                    None => return,
+                };
+                let nick = msg
+                    .author_nick(&ctx)
+                    .await
+                    .unwrap_or_else(|| msg.author.name.clone());
+                if let Err(why) = webhook
+                    .execute(&ctx, true, |w| {
+                        w.avatar_url(
+                            msg.author
+                                .avatar_url()
+                                .unwrap_or_else(|| msg.author.default_avatar_url()),
+                        )
+                        .content(uwuifier::uwuify_str_sse(&*msg.content))
+                        .username(nick)
+                        .files(
+                            msg.attachments
+                                .iter()
+                                .map(|a| AttachmentType::Image(&*a.url)),
+                        )
+                    })
+                    .await
+                {
+                    return eprintln!("Error executing webhook: {:?}", why);
+                };
+                if let Err(why) = msg.delete(&ctx).await {
+                    return eprintln!("Error deleting message: {:?}", why);
+                };
+            }
         }
     }
 
